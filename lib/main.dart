@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 
 void main() {
   runApp(const MyApp());
@@ -19,16 +17,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Dictionary',
-      theme: ThemeData(
-
-      ),
+      theme: ThemeData(),
       home: SearchScreen(),
     );
   }
 }
 
 class SearchScreen extends StatefulWidget {
-
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -45,7 +40,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   _search() async {
     if (_controller.text == null || _controller.text.isEmpty) {
-      _streamController.add("");
+      _streamController.add("Enter a word");
     }
     final response = await http.get(Uri.parse(_url + _controller.text),
         headers: {"Authorization": "Token " + _token});
@@ -58,7 +53,6 @@ class _SearchScreenState extends State<SearchScreen> {
     _streamController = StreamController();
     _stream = _streamController.stream;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -78,21 +72,32 @@ class _SearchScreenState extends State<SearchScreen> {
                     borderRadius: BorderRadius.circular(24.0),
                   ),
                   child: TextFormField(
-                    onChanged: (String text) {
-
-                    },
+                    onChanged: (String text) {},
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: 'Search for a word',
-                      contentPadding: const EdgeInsets.only(left: 24.0),
+                      contentPadding: const EdgeInsets.only(left: 24.0,top: 13.0),
                       border: InputBorder.none,
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () {
+                          if(_controller.text.isNotEmpty){
+                            _controller.text="";
+                          }
+    },
+                      ),
                     ),
                   ),
                 ),
               ),
-              IconButton(onPressed: () {
-                _search();
-              }, icon: Icon(Icons.search, color: Colors.white,))
+              IconButton(
+                  onPressed: () {
+                    _search();
+                  },
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.white,
+                  ))
             ],
           ),
         ),
@@ -106,77 +111,81 @@ class _SearchScreenState extends State<SearchScreen> {
             );
           }
           return ListView.builder(
-              itemCount: snapshot.data['definitions'].length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListBody(
-                  children: [
-                Container(
-                color: Colors.grey[300],
-                  child: ListTile(
-                    leading: snapshot.data["definitions"][index]["image_url"] ==
-                        null ? null : CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          snapshot.data["definitions"][index]["image_url"]),
-                    ),
-                    title: Text(_controller.text.trim() + "(" +
-                        snapshot.data["definitions"][index]["type"] + ")",style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24
-                    ),),
-                  ),
-                ),
-                Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                width: double.infinity,
-                height: 130,
-
-                decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15.0),
-                color: Colors.grey[200],
-                ),
-                child:Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text("Definition: ",style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),),
-                        ),
-                        SizedBox(height: 10,),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(snapshot.data["definitions"][index]["definition"],style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            fontSize: 14,
-                          ),
-                          ),
-                        ),
-
-
-                      ],
-
+            itemCount: snapshot.data['definitions'].length,
+            itemBuilder: (BuildContext context, int index) {
+              return ListBody(
+                children: [
+                  Container(
+                    color: Colors.grey[300],
+                    child: ListTile(
+                      leading: snapshot.data["definitions"][index]
+                                  ["image_url"] ==
+                              null
+                          ? null
+                          : CircleAvatar(
+                              backgroundImage: NetworkImage(snapshot
+                                  .data["definitions"][index]["image_url"]),
+                            ),
+                      title: Text(
+                        _controller.text.trim() +
+                            "(" +
+                            snapshot.data["definitions"][index]["type"] +
+                            ")",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 24),
+                      ),
                     ),
                   ),
-                ),
-    ),
-    ),
-    ],
-
-
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: Colors.grey[200],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "Definition: ",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  snapshot.data["definitions"][index]
+                                      ["definition"],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
-    );
-    },
       ),
     );
   }
 }
-
-
-
